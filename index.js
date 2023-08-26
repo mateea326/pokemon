@@ -8,6 +8,11 @@ for (let i = 0; i < collisions.length; i += 50) {
     collisionsMap.push(collisions.slice(i, 50 + i))
 }
 
+const battleZonesMap = []
+for (let i = 0; i < battleZonesData.length; i += 50) {
+    battleZonesMap.push(battleZonesData.slice(i, 50 + i))
+}
+
 class Boundary {
     static width = 64;
     static height = 64;
@@ -34,6 +39,21 @@ collisionsMap.forEach((row, i) => {
     row.forEach((symbol, j) => {
         if (symbol === 399)
             boundaries.push(new Boundary({
+                position: {
+                    x: j * Boundary.width + offset.x,
+                    y: i * Boundary.height + offset.y
+                }
+            })
+            )
+    })
+})
+
+const battleZones = []
+
+battleZonesMap.forEach((row, i) => {
+    row.forEach((symbol, j) => {
+        if (symbol === 400)
+            battleZones.push(new Boundary({
                 position: {
                     x: j * Boundary.width + offset.x,
                     y: i * Boundary.height + offset.y
@@ -139,7 +159,7 @@ const keys = {
     }
 }
 
-const movables = [background, ...boundaries]
+const movables = [background, ...boundaries, ...battleZones]
 
 function rectangularCollision({ rectangle1, rectangle2 }) {
     return (rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
@@ -148,29 +168,54 @@ function rectangularCollision({ rectangle1, rectangle2 }) {
         rectangle1.position.y + rectangle1.height >= rectangle2.position.y)
 }
 
+const battle = {
+    initiated: false
+};
+
 function animate() {
     window.requestAnimationFrame(animate);
 
     background.draw();
 
     boundaries.forEach(boundary => {
-        boundary.draw()
+        boundary.draw();
+    })
+
+    battleZones.forEach(battleZone => {
+        battleZone.draw();
     })
 
     player.draw();
 
     let moving = true;
-
     player.moving = false;
+
+    if (battle.initiated) return;
+
+    if (keys.w.pressed || keys.a.pressed || keys.s.pressed || keys.d.pressed) {
+        for (let i = 0; i < battleZones.length; i++) {
+            const battleZone = battleZones[i];
+            if (
+                rectangularCollision({
+                    rectangle1: player,
+                    rectangle2: battleZone
+                })
+                && Math.random() < 0.01) {
+                console.log("battle zone");
+                battle.initiated = true;
+                break;
+            }
+        }
+    }
 
     if (keys.w.pressed) {
 
         player.moving = true;
 
-        player.image= player.sprites.up;
+        player.image = player.sprites.up;
 
         for (let i = 0; i < boundaries.length; i++) {
-            const boundary = boundaries[i]
+            const boundary = boundaries[i];
             if (
                 rectangularCollision({
                     rectangle1: player,
@@ -183,8 +228,8 @@ function animate() {
                     }
                 })
             ) {
-                moving = false
-                break
+                moving = false;
+                break;
             }
         }
 
@@ -196,7 +241,7 @@ function animate() {
 
         player.moving = true;
 
-        player.image= player.sprites.left;
+        player.image = player.sprites.left;
 
         for (let i = 0; i < boundaries.length; i++) {
             const boundary = boundaries[i]
@@ -225,7 +270,7 @@ function animate() {
 
         player.moving = true;
 
-        player.image= player.sprites.down;
+        player.image = player.sprites.down;
 
         for (let i = 0; i < boundaries.length; i++) {
             const boundary = boundaries[i]
@@ -250,12 +295,12 @@ function animate() {
             movables.forEach((movable) => {
                 movable.position.y -= 3
             })
-    } 
+    }
     else if (keys.d.pressed) {
 
         player.moving = true;
 
-        player.image= player.sprites.right;
+        player.image = player.sprites.right;
 
         for (let i = 0; i < boundaries.length; i++) {
             const boundary = boundaries[i]
