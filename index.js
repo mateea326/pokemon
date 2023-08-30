@@ -1,5 +1,6 @@
 const canvas = document.querySelector('canvas');
 const c = canvas.getContext('2d');
+
 canvas.width = 1366;
 canvas.height = 725;
 
@@ -77,8 +78,6 @@ playerLeftImage.src = './img/playerLeft.png';
 
 const playerRightImage = new Image();
 playerRightImage.src = './img/playerRight.png';
-
-
 
 class Sprite {
     constructor({ position, velocity, image, frames = { max: 1 }, sprites = [] }) {
@@ -173,7 +172,7 @@ const battle = {
 };
 
 function animate() {
-    window.requestAnimationFrame(animate);
+    const animationId = window.requestAnimationFrame(animate);
 
     background.draw();
 
@@ -201,8 +200,30 @@ function animate() {
                     rectangle2: battleZone
                 })
                 && Math.random() < 0.01) {
-                console.log("battle zone");
+
+                window.cancelAnimationFrame(animationId);
+
                 battle.initiated = true;
+
+                gsap.to('#overlap', {
+                    opacity: 1,
+                    repeat: 3,
+                    yoyo: true,
+                    duration: 0.4,
+                    onComplete() {
+                        gsap.to('#overlap', {
+                            opacity: 1,
+                            duration: 0.4,
+                            onComplete() {
+                                animateBattle();
+                                gsap.to('#overlap', {
+                                    opacity: 0,
+                                    duration: 0.4
+                                })
+                            }
+                        })
+                    }
+                })
                 break;
             }
         }
@@ -328,6 +349,22 @@ function animate() {
     }
 }
 animate();
+
+const battleBackgroundImg = new Image();
+battleBackgroundImg.src = './img/battleBackground.png';
+
+const battleBackground = new Sprite({
+    position: {
+        x: 0,
+        y: 0
+    },
+    image: battleBackgroundImg
+});
+
+function animateBattle() {
+    window.requestAnimationFrame(animateBattle);
+    battleBackground.draw();
+}
 
 window.addEventListener('keydown', (e) => {
     switch (e.key) {
