@@ -353,6 +353,7 @@ animate();
 const battleBackgroundImg = new Image();
 battleBackgroundImg.src = './img/battleBackground.png';
 
+
 const battleBackground = new Sprite({
     position: {
         x: 0,
@@ -361,9 +362,48 @@ const battleBackground = new Sprite({
     image: battleBackgroundImg
 });
 
+const bulbasaurImg = new Image();
+bulbasaurImg.src = './img/bulbasaur.png';
+
+const pikachuImg = new Image();
+pikachuImg.src = './img/pikachu.png';
+
+const squirtleImg = new Image();
+squirtleImg.src = './img/squirtle.png';
+
+const bulbasaur = new Sprite({
+    position:
+    {
+        x: 980,
+        y: 30
+    },
+    image: bulbasaurImg
+});
+
+const squirtle = new Sprite({
+    position:
+    {
+        x: 950,
+        y: 0
+    },
+    image: squirtleImg
+});
+
+const pikachu = new Sprite({
+    position:
+    {
+        x: 250,
+        y: 200
+    },
+    image: pikachuImg
+});
+
 function animateBattle() {
     window.requestAnimationFrame(animateBattle);
+
     battleBackground.draw();
+    squirtle.draw();
+    pikachu.draw();
 }
 
 window.addEventListener('keydown', (e) => {

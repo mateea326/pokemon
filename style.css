@@ -9,6 +9,13 @@
     pointer-events: none;
 }
 
+#rectangle {
+    background: white;
+    position: absolute;
+    width: 1366;
+    bottom: 0;
+}
+
 #parent {
     display: inline-block;
     position: relative;
