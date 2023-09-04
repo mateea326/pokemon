@@ -12,7 +12,8 @@
 #rectangle {
     background: white;
     position: absolute;
-    width: 1366;
+    width: 1366px;
+    height: 200px;
     bottom: 0;
 }
 
