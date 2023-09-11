@@ -1,3 +1,8 @@
+* {
+    font-family: 'Press Start 2P', cursive;
+    box-sizing: border-box;
+}
+
 #overlap {
     background: black;
     position: absolute;
@@ -9,15 +14,89 @@
     pointer-events: none;
 }
 
+h1 {
+    margin: 0;
+    font-size: 16px;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: rgb(198, 219, 235);
+}
+
 #rectangle {
     background: white;
     position: absolute;
     width: 1366px;
-    height: 200px;
+    height: 140px;
     bottom: 0;
+    border: 4px black solid;
+    display: flex;
 }
 
 #parent {
     display: inline-block;
     position: relative;
+}
+
+#attack {
+    width: 66.66%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+#type {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 33.33%;
+    border-left: 4px black solid;
+}
+
+#topbox {
+    background-color: white;
+    width: 250px;
+    padding: 12px;
+    position: absolute;
+    top: 25px;
+    left: 40px;
+    border: 4px black solid;
+}
+
+#bottombox {
+    background-color: white;
+    width: 250px;
+    padding: 12px;
+    position: absolute;
+    top: 450px;
+    right: 25px;
+    border: 4px black solid;
+}
+
+#enemy,#pikachu {
+    font-size: 14px;
+}
+
+.healthbar {
+    position: relative;
+}
+
+.healthgrey {
+    height: 5px;
+    background-color: lightgrey;
+    margin-top: 10px;
+}
+
+.healthgreen {
+    height: 5px;
+    background-color: rgb(121, 207, 171);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
 }

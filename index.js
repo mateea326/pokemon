@@ -91,6 +91,7 @@ class Sprite {
         this.moving = false;
         this.sprites = sprites;
     }
+
     draw() {
         c.drawImage(
             this.image,
@@ -116,6 +117,35 @@ class Sprite {
             }
         }
     }
+
+    attack({ attack, recipient }) {
+
+        const tl = gsap.timeline();
+
+        tl.to(this.position, {
+            x: this.position.x - 20
+        }).to(this.position, {
+            x: this.position.x + 40,
+            duration: 0.1,
+            onComplete() {
+                gsap.to(recipient.position, {
+                    x: recipient.position.x + 10,
+                    yoyo: true,
+                    repeat: 5,
+                    duration: 0.08,
+                })
+                gsap.to(recipient, {
+                    opacity: 0,
+                    repeat: 5,
+                    yoyo: true,
+                    duration: 0.08
+                })
+            }
+        }).to(this.position, {
+            x: this.position.x
+        })
+    }
+
 };
 
 const player = new Sprite({
@@ -353,7 +383,6 @@ animate();
 const battleBackgroundImg = new Image();
 battleBackgroundImg.src = './img/battleBackground.png';
 
-
 const battleBackground = new Sprite({
     position: {
         x: 0,
@@ -386,8 +415,8 @@ const pikachu = new Sprite({
 const bulbasaur = new Sprite({
     position:
     {
-        x: 980,
-        y: 30
+        x: 950,
+        y: -40
     },
     image: bulbasaurImg
 });
@@ -395,8 +424,8 @@ const bulbasaur = new Sprite({
 const squirtle = new Sprite({
     position:
     {
-        x: 950,
-        y: -5
+        x: 1000,
+        y: 20
     },
     image: squirtleImg
 });
@@ -404,7 +433,7 @@ const squirtle = new Sprite({
 const charmander = new Sprite({
     position:
     {
-        x: 950,
+        x: 1020,
         y: -5
     },
     image: charmanderImg
@@ -412,18 +441,32 @@ const charmander = new Sprite({
 
 var characters = new Array(bulbasaur, squirtle, charmander);
 
-function choosePic() {
-    var randomNum = Math.floor(Math.random() * characters.length);
-    characters[randomNum].draw();
-};
-
 function animateBattle() {
     window.requestAnimationFrame(animateBattle);
 
     battleBackground.draw();
     pikachu.draw();
-    choosePic();
+    squirtle.draw();
+
+    /*var randomNum = Math.floor(Math.random() * characters.length);
+    characters[randomNum].draw();*/
 }
+
+animateBattle();
+
+document.querySelectorAll('button').forEach(button => {
+    button.addEventListener('click', () => {
+        pikachu.attack({
+            attack: {
+                name: 'Tackle',
+                damage: 10,
+                type: 'Normal'
+            },
+            recipient: squirtle //charmander,bulbasaur
+        })
+    });
+});
+
 
 window.addEventListener('keydown', (e) => {
     switch (e.key) {

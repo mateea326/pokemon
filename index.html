@@ -7,13 +7,44 @@
     <link rel="icon" href="img/icon.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css" type="text/css">
     <title>Pokemon Project</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
 </head>
 
 <body>
     <div id="parent">
         <div id="overlap"></div>
+
+        <div id="topbox">
+            <h1 id="enemy">Enemy</h1>
+            <div class="healthbar">
+                <div class="healthgrey"></div>
+                <div class="healthgreen"></div>
+            </div>
+        </div>
+
+        <div id="bottombox">
+            <h1 id="pikachu">Pikachu</h1>
+            <div class="healthbar">
+                <div class="healthgrey"></div>
+                <div class="healthgreen"></div>
+            </div>
+        </div>
+
         <canvas></canvas>
-        <div id="rectangle"></div>
+
+        <div id="rectangle">
+            <div id="attack">
+                <button>Tackle</button>
+                <button>Attack</button>
+            </div>
+            <div id="type">
+                <h1>Attack Type</h1>
+            </div>
+        </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"
         integrity="sha512-H6cPm97FAsgIKmlBA4s774vqoN24V5gSQL4yBTDOY2su2DeXZVhQPxFK4P6GPdnZqM9fg1G3cMv5wD7e6cFLZQ=="
