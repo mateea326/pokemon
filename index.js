@@ -80,7 +80,7 @@ const playerRightImage = new Image();
 playerRightImage.src = './img/playerRight.png';
 
 class Sprite {
-    constructor({ position, velocity, image, frames = { max: 1 }, sprites = [] }) {
+    constructor({ position, velocity, image, isEnemy = false, frames = { max: 1 }, sprites = [] }) {
         this.position = position;
         this.image = image;
         this.frames = { ...frames, val: 0, elapsed: 0 };
@@ -90,9 +90,17 @@ class Sprite {
         }
         this.moving = false;
         this.sprites = sprites;
+        this.opacity = 1;
+        this.health = 100;
+        this.isEnemy = isEnemy;
     }
 
     draw() {
+
+        c.save()
+        c.globalAlpha = this.opacity;
+
+
         c.drawImage(
             this.image,
             this.frames.val * this.width,
@@ -103,6 +111,8 @@ class Sprite {
             this.position.y,
             this.image.width / this.frames.max,
             this.image.height)
+
+        c.restore()
 
         if (this.moving) {
             if (this.frames.max > 1)
@@ -122,12 +132,26 @@ class Sprite {
 
         const tl = gsap.timeline();
 
+        this.health -= attack.damage;
+
+        let movementDistance = 20;
+        if (this.isEnemy) movementDistance = -20;
+
+        let healthBar = '#enemyhealth';
+        if (this.isEnemy)
+            healthBar = '#pikachuhealth';
+
         tl.to(this.position, {
-            x: this.position.x - 20
+            x: this.position.x - movementDistance
         }).to(this.position, {
-            x: this.position.x + 40,
+            x: this.position.x + movementDistance * 2,
             duration: 0.1,
-            onComplete() {
+            onComplete: () => {
+
+                gsap.to(healthBar, {
+                    width: this.health - attack.damage + '%'
+                })
+
                 gsap.to(recipient.position, {
                     x: recipient.position.x + 10,
                     yoyo: true,
@@ -418,7 +442,8 @@ const bulbasaur = new Sprite({
         x: 950,
         y: -40
     },
-    image: bulbasaurImg
+    image: bulbasaurImg,
+    isEnemy: true
 });
 
 const squirtle = new Sprite({
@@ -427,7 +452,8 @@ const squirtle = new Sprite({
         x: 1000,
         y: 20
     },
-    image: squirtleImg
+    image: squirtleImg,
+    isEnemy: true
 });
 
 const charmander = new Sprite({
@@ -436,20 +462,34 @@ const charmander = new Sprite({
         x: 1020,
         y: -5
     },
-    image: charmanderImg
+    image: charmanderImg,
+    isEnemy: true
 });
 
-var characters = new Array(bulbasaur, squirtle, charmander);
+const characters = [
+    { name: "Bulbasaur", sprite: bulbasaur },
+    { name: "Squirtle", sprite: squirtle },
+    { name: "Charmander", sprite: charmander },
+];
+
+let currentCharacter = null;
 
 function animateBattle() {
     window.requestAnimationFrame(animateBattle);
 
     battleBackground.draw();
     pikachu.draw();
-    squirtle.draw();
 
-    /*var randomNum = Math.floor(Math.random() * characters.length);
-    characters[randomNum].draw();*/
+    if (!currentCharacter) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        currentCharacter = characters[randomIndex];
+
+        const characterNameElement = document.getElementById("enemy");
+        characterNameElement.textContent = currentCharacter.name;
+    }
+
+
+    currentCharacter.sprite.draw();
 }
 
 animateBattle();
@@ -462,7 +502,7 @@ document.querySelectorAll('button').forEach(button => {
                 damage: 10,
                 type: 'Normal'
             },
-            recipient: squirtle //charmander,bulbasaur
+            recipient: currentCharacter.sprite
         })
     });
 });
