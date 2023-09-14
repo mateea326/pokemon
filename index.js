@@ -80,7 +80,8 @@ const playerRightImage = new Image();
 playerRightImage.src = './img/playerRight.png';
 
 class Sprite {
-    constructor({ position, velocity, image, isEnemy = false, frames = { max: 1 }, sprites = [] }) {
+    constructor({ position, velocity, image, isEnemy = false,
+        frames = { max: 1 }, sprites = [], animate = false, rotation = 0, name }) {
         this.position = position;
         this.image = image;
         this.frames = { ...frames, val: 0, elapsed: 0 };
@@ -88,18 +89,23 @@ class Sprite {
             this.width = this.image.width / this.frames.max;
             this.height = this.image.height;
         }
-        this.moving = false;
+        this.animate = animate;
         this.sprites = sprites;
         this.opacity = 1;
         this.health = 100;
         this.isEnemy = isEnemy;
+        this.rotation = rotation;
+        this.name = name;
     }
 
     draw() {
 
-        c.save()
-        c.globalAlpha = this.opacity;
+        c.save();
+        c.translate(this.position.x + this.width / 2, this.position.y + this.height / 2);
+        c.rotate(this.rotation);
+        c.translate(-this.position.x - this.width / 2, -this.position.y - this.height / 2);
 
+        c.globalAlpha = this.opacity;
 
         c.drawImage(
             this.image,
@@ -112,9 +118,9 @@ class Sprite {
             this.image.width / this.frames.max,
             this.image.height)
 
-        c.restore()
+        c.restore();
 
-        if (this.moving) {
+        if (this.animate) {
             if (this.frames.max > 1)
                 this.frames.elapsed++;
 
@@ -128,48 +134,105 @@ class Sprite {
         }
     }
 
-    attack({ attack, recipient }) {
+    attack({ attack, recipient, renderedSprites }) {
 
-        const tl = gsap.timeline();
-
-        this.health -= attack.damage;
-
-        let movementDistance = 20;
-        if (this.isEnemy) movementDistance = -20;
+        document.querySelector('#dialogue').style.display = 'block';
+        document.querySelector('#dialogue').innerHTML = this.name + ' used ' + attack.name;
 
         let healthBar = '#enemyhealth';
         if (this.isEnemy)
             healthBar = '#pikachuhealth';
 
-        tl.to(this.position, {
-            x: this.position.x - movementDistance
-        }).to(this.position, {
-            x: this.position.x + movementDistance * 2,
-            duration: 0.1,
-            onComplete: () => {
+        let rotation = 1;
+        if (this.isEnemy)
+            rotation = -2.2;
 
-                gsap.to(healthBar, {
-                    width: this.health - attack.damage + '%'
-                })
+        recipient.health -= attack.damage;
 
-                gsap.to(recipient.position, {
-                    x: recipient.position.x + 10,
-                    yoyo: true,
-                    repeat: 5,
-                    duration: 0.08,
+        switch (attack.name) {
+            case 'Tackle':
+                const tl = gsap.timeline();
+
+                let movementDistance = 20;
+                if (this.isEnemy) movementDistance = -20;
+
+                tl.to(this.position, {
+                    x: this.position.x - movementDistance
+                }).to(this.position, {
+                    x: this.position.x + movementDistance * 2,
+                    duration: 0.1,
+                    onComplete: () => {
+
+                        gsap.to(healthBar, {
+                            width: recipient.health + '%'
+                        });
+
+                        gsap.to(recipient.position, {
+                            x: recipient.position.x + 10,
+                            yoyo: true,
+                            repeat: 5,
+                            duration: 0.08,
+                        });
+
+                        gsap.to(recipient, {
+                            opacity: 0,
+                            repeat: 5,
+                            yoyo: true,
+                            duration: 0.08
+                        });
+                    }
+                }).to(this.position, {
+                    x: this.position.x
                 })
-                gsap.to(recipient, {
-                    opacity: 0,
-                    repeat: 5,
-                    yoyo: true,
-                    duration: 0.08
+                break;
+
+            case 'Fireball':
+                const fireballImage = new Image();
+                fireballImage.src = './img/fireball.png';
+
+                const fireball = new Sprite({
+                    position: {
+                        x: this.position.x,
+                        y: this.position.y
+                    },
+                    image: fireballImage,
+                    frames: {
+                        max: 4
+                    },
+                    animate: true,
+                    rotation
+                });
+
+                gsap.to(fireball.position, {
+                    x: recipient.position.x,
+                    y: recipient.position.y,
+                    onComplete: () => {
+
+                        gsap.to(healthBar, {
+                            width: recipient.health + '%'
+                        });
+
+                        gsap.to(recipient.position, {
+                            x: recipient.position.x + 10,
+                            yoyo: true,
+                            repeat: 5,
+                            duration: 0.08,
+                        });
+
+                        gsap.to(recipient, {
+                            opacity: 0,
+                            repeat: 5,
+                            yoyo: true,
+                            duration: 0.08,
+                            onComplete: () => {
+                                renderedSprites.pop();
+                            }
+                        });
+                    }
                 })
-            }
-        }).to(this.position, {
-            x: this.position.x
-        })
+                break;
+        }
     }
-
 };
 
 const player = new Sprite({
@@ -241,7 +304,7 @@ function animate() {
     player.draw();
 
     let moving = true;
-    player.moving = false;
+    player.animate = false;
 
     if (battle.initiated) return;
 
@@ -285,7 +348,7 @@ function animate() {
 
     if (keys.w.pressed) {
 
-        player.moving = true;
+        player.animate = true;
 
         player.image = player.sprites.up;
 
@@ -314,7 +377,7 @@ function animate() {
             })
     } else if (keys.a.pressed) {
 
-        player.moving = true;
+        player.animate = true;
 
         player.image = player.sprites.left;
 
@@ -343,7 +406,7 @@ function animate() {
             })
     } else if (keys.s.pressed) {
 
-        player.moving = true;
+        player.animate = true;
 
         player.image = player.sprites.down;
 
@@ -373,7 +436,7 @@ function animate() {
     }
     else if (keys.d.pressed) {
 
-        player.moving = true;
+        player.animate = true;
 
         player.image = player.sprites.right;
 
@@ -433,17 +496,19 @@ const pikachu = new Sprite({
         x: 250,
         y: 200
     },
-    image: pikachuImg
+    image: pikachuImg,
+    name: 'Pikachu'
 });
 
 const bulbasaur = new Sprite({
     position:
     {
-        x: 950,
-        y: -40
+        x: 1000,
+        y: 10
     },
     image: bulbasaurImg,
-    isEnemy: true
+    isEnemy: true,
+    name: 'Bulbasaur'
 });
 
 const squirtle = new Sprite({
@@ -453,26 +518,26 @@ const squirtle = new Sprite({
         y: 20
     },
     image: squirtleImg,
-    isEnemy: true
+    isEnemy: true,
+    name: 'Squirtle'
 });
 
 const charmander = new Sprite({
     position:
     {
-        x: 1020,
-        y: -5
+        x: 1030,
+        y: 10
     },
     image: charmanderImg,
-    isEnemy: true
+    isEnemy: true,
+    name: 'Charmander'
 });
 
-const characters = [
-    { name: "Bulbasaur", sprite: bulbasaur },
-    { name: "Squirtle", sprite: squirtle },
-    { name: "Charmander", sprite: charmander },
-];
+const characters = [bulbasaur, squirtle, charmander];
 
 let currentCharacter = null;
+
+const renderedSprites = [];
 
 function animateBattle() {
     window.requestAnimationFrame(animateBattle);
@@ -488,25 +553,48 @@ function animateBattle() {
         characterNameElement.textContent = currentCharacter.name;
     }
 
+    currentCharacter.draw();
 
-    currentCharacter.sprite.draw();
+    renderedSprites.forEach((sprite) => {
+        sprite.draw();
+    })
 }
 
 animateBattle();
 
+const queue = []
+
 document.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+        const selectedAttack = attacks[e.currentTarget.innerHTML];
         pikachu.attack({
-            attack: {
-                name: 'Tackle',
-                damage: 10,
-                type: 'Normal'
-            },
-            recipient: currentCharacter.sprite
-        })
+            attack: selectedAttack,
+            recipient: currentCharacter,
+            renderedSprites
+        });
+        queue.push(() => {
+
+            const attackNames = Object.keys(attacks); 
+            const randomAttackName = attackNames[Math.floor(Math.random() * attackNames.length)];
+            const randomAttack = attacks[randomAttackName];
+
+            currentCharacter.attack({
+                attack: randomAttack,
+                recipient: pikachu,
+                renderedSprites
+            });
+        });
     });
 });
 
+document.querySelector('#dialogue').addEventListener('click', (e) => {
+    if (queue.length > 0) {
+        queue[0]()
+        queue.shift()
+    }
+    else
+        e.currentTarget.style.display = 'none';
+});
 
 window.addEventListener('keydown', (e) => {
     switch (e.key) {

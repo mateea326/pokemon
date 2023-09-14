@@ -78,7 +78,8 @@ button:hover {
     border: 4px black solid;
 }
 
-#enemy,#pikachu {
+#enemy,
+#pikachu {
     font-size: 14px;
 }
 
@@ -99,4 +100,16 @@ button:hover {
     top: 0;
     left: 0;
     right: 0;
+}
+
+#dialogue {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px;
+    display: none;
+    background: white;
+    cursor: pointer;
 }
