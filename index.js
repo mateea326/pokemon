@@ -233,6 +233,16 @@ class Sprite {
                 break;
         }
     }
+
+    faint() {
+        document.querySelector('#dialogue').innerHTML = this.name + ' fainted!';
+        gsap.to(this.position, {
+            y: this.position.y + 20
+        })
+        gsap.to(this, {
+            opacity: 0
+        })
+    }
 };
 
 const player = new Sprite({
@@ -566,25 +576,49 @@ const queue = []
 
 document.querySelectorAll('button').forEach(button => {
     button.addEventListener('click', (e) => {
+
         const selectedAttack = attacks[e.currentTarget.innerHTML];
+
         pikachu.attack({
             attack: selectedAttack,
             recipient: currentCharacter,
             renderedSprites
         });
-        queue.push(() => {
 
-            const attackNames = Object.keys(attacks); 
-            const randomAttackName = attackNames[Math.floor(Math.random() * attackNames.length)];
-            const randomAttack = attacks[randomAttackName];
+        if (currentCharacter.health <= 0) {
+
+            queue.push(() => {
+                currentCharacter.faint();
+            });
+            return
+        }
+
+        const attackNames = Object.keys(attacks);
+        const randomAttackName = attackNames[Math.floor(Math.random() * attackNames.length)];
+        const randomAttack = attacks[randomAttackName];
+
+        queue.push(() => {
 
             currentCharacter.attack({
                 attack: randomAttack,
                 recipient: pikachu,
                 renderedSprites
             });
+
+            if (pikachu.health <= 0) {
+
+                queue.push(() => {
+                    pikachu.faint();
+                });
+                return
+            }
         });
     });
+    button.addEventListener('mouseenter', (e) => {
+        const selectedAttack = attacks[e.currentTarget.innerHTML];
+        document.querySelector('#attacktype').innerHTML = selectedAttack.type;
+        document.querySelector('#type').style.background = selectedAttack.color;
+    })
 });
 
 document.querySelector('#dialogue').addEventListener('click', (e) => {
