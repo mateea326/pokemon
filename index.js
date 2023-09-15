@@ -65,7 +65,7 @@ battleZonesMap.forEach((row, i) => {
 })
 
 const image = new Image();
-image.src = './img/PokeMap.png';
+image.src = './img/PokemonMap.png';
 
 const playerDownImage = new Image();
 playerDownImage.src = './img/playerDown.png';
@@ -80,15 +80,18 @@ const playerRightImage = new Image();
 playerRightImage.src = './img/playerRight.png';
 
 class Sprite {
-    constructor({ position, velocity, image, isEnemy = false,
+    constructor({ position, image, isEnemy = false,
         frames = { max: 1 }, sprites = [], animate = false, rotation = 0, name }) {
         this.position = position;
-        this.image = image;
+        this.image = new Image();
         this.frames = { ...frames, val: 0, elapsed: 0 };
+
         this.image.onload = () => {
             this.width = this.image.width / this.frames.max;
             this.height = this.image.height;
         }
+
+        this.image.src = image.src;
         this.animate = animate;
         this.sprites = sprites;
         this.opacity = 1;
@@ -106,6 +109,15 @@ class Sprite {
         c.translate(-this.position.x - this.width / 2, -this.position.y - this.height / 2);
 
         c.globalAlpha = this.opacity;
+
+        const image = {
+            position: {
+                x: this.position.x,
+                y: this.position.y
+            },
+            width: this.image.width / this.frames.max,
+            height: this.image.height
+        }
 
         c.drawImage(
             this.image,
@@ -133,6 +145,25 @@ class Sprite {
             }
         }
     }
+}
+
+class Monster extends Sprite {
+    constructor({ position, image, frames = { max: 1 }, sprites, animate = false,
+        rotation = 0, isEnemy = false, name, attacks
+    }) {
+        super({
+            position,
+            image,
+            frames,
+            sprites,
+            animate,
+            rotation
+        })
+        this.health = 100
+        this.isEnemy = isEnemy
+        this.name = name
+        this.attacks = attacks
+    }
 
     attack({ attack, recipient, renderedSprites }) {
 
@@ -158,32 +189,34 @@ class Sprite {
 
                 tl.to(this.position, {
                     x: this.position.x - movementDistance
-                }).to(this.position, {
-                    x: this.position.x + movementDistance * 2,
-                    duration: 0.1,
-                    onComplete: () => {
-
-                        gsap.to(healthBar, {
-                            width: recipient.health + '%'
-                        });
-
-                        gsap.to(recipient.position, {
-                            x: recipient.position.x + 10,
-                            yoyo: true,
-                            repeat: 5,
-                            duration: 0.08,
-                        });
-
-                        gsap.to(recipient, {
-                            opacity: 0,
-                            repeat: 5,
-                            yoyo: true,
-                            duration: 0.08
-                        });
-                    }
-                }).to(this.position, {
-                    x: this.position.x
                 })
+                    .to(this.position, {
+                        x: this.position.x + movementDistance * 2,
+                        duration: 0.1,
+                        onComplete: () => {
+
+                            gsap.to(healthBar, {
+                                width: recipient.health + '%'
+                            });
+
+                            gsap.to(recipient.position, {
+                                x: recipient.position.x + 10,
+                                yoyo: true,
+                                repeat: 5,
+                                duration: 0.08,
+                            });
+
+                            gsap.to(recipient, {
+                                opacity: 0,
+                                repeat: 5,
+                                yoyo: true,
+                                duration: 0.08
+                            });
+                        }
+                    })
+                    .to(this.position, {
+                        x: this.position.x
+                    })
                 break;
 
             case 'Fireball':
@@ -202,6 +235,8 @@ class Sprite {
                     animate: true,
                     rotation
                 });
+
+                renderedSprites.splice(1, 0, fireball);
 
                 gsap.to(fireball.position, {
                     x: recipient.position.x,
@@ -228,6 +263,7 @@ class Sprite {
                                 renderedSprites.pop();
                             }
                         });
+                        renderedSprites.splice(1, 1);
                     }
                 })
                 break;
@@ -342,6 +378,7 @@ function animate() {
                             opacity: 1,
                             duration: 0.4,
                             onComplete() {
+                                initBattle();
                                 animateBattle();
                                 gsap.to('#overlap', {
                                     opacity: 0,
@@ -475,7 +512,6 @@ function animate() {
             })
     }
 }
-animate();
 
 const battleBackgroundImg = new Image();
 battleBackgroundImg.src = './img/battleBackground.png';
@@ -488,72 +524,32 @@ const battleBackground = new Sprite({
     image: battleBackgroundImg
 });
 
-const pikachuImg = new Image();
-pikachuImg.src = './img/pikachu.png';
+let pikachu;
+let bulbasaur;
+let squirtle;
+let charmander;
 
-const bulbasaurImg = new Image();
-bulbasaurImg.src = './img/bulbasaur.png';
+let currentCharacter;
+let renderedSprites;
+let battleAnimationId;
+let queue;
 
-const squirtleImg = new Image();
-squirtleImg.src = './img/squirtle.png';
+function initBattle() {
 
-const charmanderImg = new Image();
-charmanderImg.src = './img/charmander.png';
+    document.querySelector('#battlebuttons').style.display = 'block';
+    document.querySelector('#dialogue').style.display = 'none';
+    document.querySelector('#enemyhealth').style.width = '100%';
+    document.querySelector('#pikachuhealth').style.width = '100%';
+    document.querySelector('#attack').replaceChildren();
 
-const pikachu = new Sprite({
-    position:
-    {
-        x: 250,
-        y: 200
-    },
-    image: pikachuImg,
-    name: 'Pikachu'
-});
+    pikachu = new Monster(monsters.Pikachu);
+    bulbasaur = new Monster(monsters.Bulbasaur);
+    squirtle = new Monster(monsters.Squirtle);
+    charmander = new Monster(monsters.Charmander);
 
-const bulbasaur = new Sprite({
-    position:
-    {
-        x: 1000,
-        y: 10
-    },
-    image: bulbasaurImg,
-    isEnemy: true,
-    name: 'Bulbasaur'
-});
-
-const squirtle = new Sprite({
-    position:
-    {
-        x: 1000,
-        y: 20
-    },
-    image: squirtleImg,
-    isEnemy: true,
-    name: 'Squirtle'
-});
-
-const charmander = new Sprite({
-    position:
-    {
-        x: 1030,
-        y: 10
-    },
-    image: charmanderImg,
-    isEnemy: true,
-    name: 'Charmander'
-});
-
-const characters = [bulbasaur, squirtle, charmander];
-
-let currentCharacter = null;
-
-const renderedSprites = [];
-
-function animateBattle() {
-    window.requestAnimationFrame(animateBattle);
-
-    battleBackground.draw();
-    pikachu.draw();
+    const characters = [bulbasaur, squirtle, charmander];
+    currentCharacter = null;
+    queue = [];
 
     if (!currentCharacter) {
         const randomIndex = Math.floor(Math.random() * characters.length);
@@ -563,63 +559,97 @@ function animateBattle() {
         characterNameElement.textContent = currentCharacter.name;
     }
 
-    currentCharacter.draw();
+    renderedSprites = [currentCharacter, pikachu];
+
+    pikachu.attacks.forEach((attack) => {
+        const button = document.createElement('button')
+        button.innerHTML = attack.name
+        document.querySelector('#attack').append(button)
+    })
+
+    document.querySelectorAll('button').forEach((button) => {
+        button.addEventListener('click', (e) => {
+            const selectedAttack = attacks[e.currentTarget.innerHTML];
+
+            pikachu.attack({
+                attack: selectedAttack,
+                recipient: currentCharacter,
+                renderedSprites
+            });
+
+            if (currentCharacter.health <= 0) {
+                queue.push(() => {
+                    currentCharacter.faint();
+                });
+
+                queue.push(() => {
+                    gsap.to('#overlap', {
+                        opacity: 1,
+                        onComplete: () => {
+                            cancelAnimationFrame(battleAnimationId);
+                            animate();
+                            document.querySelector('#battlebuttons').style.display = 'none';
+
+                            gsap.to('#overlap', {
+                                opacity: 0
+                            })
+                            battle.initiated = false;
+                        }
+                    })
+                })
+            }
+
+            const randomAttack = pikachu.attacks[Math.floor(Math.random() * pikachu.attacks.length)];
+
+            queue.push(() => {
+                currentCharacter.attack({
+                    attack: randomAttack,
+                    recipient: pikachu,
+                    renderedSprites
+                });
+
+                if (pikachu.health <= 0) {
+                    queue.push(() => {
+                        pikachu.faint();
+                    });
+
+                    queue.push(() => {
+                        gsap.to('#overlap', {
+                            opacity: 1,
+                            onComplete: () => {
+                                cancelAnimationFrame(battleAnimationId);
+                                animate();
+                                document.querySelector('#battlebuttons').style.display = 'none';
+
+                                gsap.to('#overlap', {
+                                    opacity: 0
+                                })
+                                battle.initiated = false;
+                            }
+                        })
+                    })
+                }
+            })
+        })
+
+        button.addEventListener('mouseenter', (e) => {
+            const selectedAttack = attacks[e.currentTarget.innerHTML];
+            document.querySelector('#attacktype').innerHTML = selectedAttack.type;
+            document.querySelector('#type').style.background = selectedAttack.color;
+        })
+    })
+}
+
+function animateBattle() {
+    battleAnimationId = window.requestAnimationFrame(animateBattle);
+    battleBackground.draw();
 
     renderedSprites.forEach((sprite) => {
         sprite.draw();
     })
 }
 
-animateBattle();
-
-const queue = []
-
-document.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', (e) => {
-
-        const selectedAttack = attacks[e.currentTarget.innerHTML];
-
-        pikachu.attack({
-            attack: selectedAttack,
-            recipient: currentCharacter,
-            renderedSprites
-        });
-
-        if (currentCharacter.health <= 0) {
-
-            queue.push(() => {
-                currentCharacter.faint();
-            });
-            return
-        }
-
-        const attackNames = Object.keys(attacks);
-        const randomAttackName = attackNames[Math.floor(Math.random() * attackNames.length)];
-        const randomAttack = attacks[randomAttackName];
-
-        queue.push(() => {
-
-            currentCharacter.attack({
-                attack: randomAttack,
-                recipient: pikachu,
-                renderedSprites
-            });
-
-            if (pikachu.health <= 0) {
-
-                queue.push(() => {
-                    pikachu.faint();
-                });
-                return
-            }
-        });
-    });
-    button.addEventListener('mouseenter', (e) => {
-        const selectedAttack = attacks[e.currentTarget.innerHTML];
-        document.querySelector('#attacktype').innerHTML = selectedAttack.type;
-        document.querySelector('#type').style.background = selectedAttack.color;
-    })
-});
+animate();
 
 document.querySelector('#dialogue').addEventListener('click', (e) => {
     if (queue.length > 0) {

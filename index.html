@@ -16,34 +16,36 @@
 
 <body>
     <div id="parent">
+
         <div id="overlap"></div>
-
-        <div id="topbox">
-            <h1 id="enemy">Enemy</h1>
-            <div class="healthbar">
-                <div class="healthgrey"></div>
-                <div id="enemyhealth" class="healthgreen"></div>
-            </div>
-        </div>
-
-        <div id="bottombox">
-            <h1 id="pikachu">Pikachu</h1>
-            <div class="healthbar">
-                <div class="healthgrey"></div>
-                <div id="pikachuhealth" class="healthgreen"></div>
-            </div>
-        </div>
-
         <canvas></canvas>
 
-        <div id="rectangle">
-            <div id="dialogue"></div>
-            <div id="attack">
-                <button>Tackle</button>
-                <button>Fireball</button>
+        <div id="battlebuttons">
+            <div id="topbox">
+                <h1 id="enemy">Enemy</h1>
+                <div class="healthbar">
+                    <div class="healthgrey"></div>
+                    <div id="enemyhealth" class="healthgreen"></div>
+                </div>
             </div>
-            <div id="type">
-                <h1 id="attacktype">Attack Type</h1>
+
+            <div id="bottombox">
+                <h1 id="pikachu">Pikachu</h1>
+                <div class="healthbar">
+                    <div class="healthgrey"></div>
+                    <div id="pikachuhealth" class="healthgreen"></div>
+                </div>
+            </div>
+
+            <div id="rectangle">
+                <div id="dialogue"></div>
+                <div id="attack">
+                    <button>Tackle</button>
+                    <button>Fireball</button>
+                </div>
+                <div id="type">
+                    <h1 id="attacktype">Attack Type</h1>
+                </div>
             </div>
         </div>
 
@@ -55,6 +57,8 @@
     <script src="battleZones.js"></script>
     <script src="collisions.js"></script>
     <script src="attacks.js"></script>
+    <script src="monsters.js"></script>
     <script src="index.js"></script>
 </body>
+
 </html>
