@@ -67,6 +67,9 @@ battleZonesMap.forEach((row, i) => {
 const image = new Image();
 image.src = './img/PokemonMap.png';
 
+const waterImage = new Image();
+waterImage.src = './img/WaterMap.png';
+
 const playerDownImage = new Image();
 playerDownImage.src = './img/playerDown.png';
 
@@ -258,10 +261,7 @@ class Monster extends Sprite {
                             opacity: 0,
                             repeat: 5,
                             yoyo: true,
-                            duration: 0.08,
-                            onComplete: () => {
-                                renderedSprites.pop();
-                            }
+                            duration: 0.08
                         });
                         renderedSprites.splice(1, 1);
                     }
@@ -336,6 +336,10 @@ const battle = {
 
 function animate() {
     const animationId = window.requestAnimationFrame(animate);
+
+    c.clearRect(0, 0, canvas.width, canvas.height);
+
+    c.drawImage(waterImage, 0, 0, canvas.width * 2.5, canvas.height * 2.5);
 
     background.draw();
 
@@ -548,18 +552,15 @@ function initBattle() {
     charmander = new Monster(monsters.Charmander);
 
     const characters = [bulbasaur, squirtle, charmander];
-    currentCharacter = null;
-    queue = [];
 
-    if (!currentCharacter) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        currentCharacter = characters[randomIndex];
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    currentCharacter = characters[randomIndex];
 
-        const characterNameElement = document.getElementById("enemy");
-        characterNameElement.textContent = currentCharacter.name;
-    }
+    const characterNameElement = document.getElementById("enemy");
+    characterNameElement.textContent = currentCharacter.name;
 
     renderedSprites = [currentCharacter, pikachu];
+    queue = [];
 
     pikachu.attacks.forEach((attack) => {
         const button = document.createElement('button')
