@@ -200,21 +200,22 @@ class Monster extends Sprite {
 
                             gsap.to(healthBar, {
                                 width: recipient.health + '%'
-                            });
+                            })
 
                             gsap.to(recipient.position, {
                                 x: recipient.position.x + 10,
                                 yoyo: true,
                                 repeat: 5,
-                                duration: 0.08,
-                            });
+                                duration: 0.08
+                            })
 
                             gsap.to(recipient, {
                                 opacity: 0,
                                 repeat: 5,
                                 yoyo: true,
                                 duration: 0.08
-                            });
+                                
+                            })
                         }
                     })
                     .to(this.position, {
@@ -262,8 +263,10 @@ class Monster extends Sprite {
                             repeat: 5,
                             yoyo: true,
                             duration: 0.08
-                        });
+                        })
+
                         renderedSprites.splice(1, 1);
+
                     }
                 })
                 break;
@@ -276,7 +279,10 @@ class Monster extends Sprite {
             y: this.position.y + 20
         })
         gsap.to(this, {
-            opacity: 0
+            opacity: 0,
+            onComplete: () => {
+                this.position.y = this.position.y - 20;
+            }
         })
     }
 };
