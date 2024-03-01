@@ -1,1 +1,1 @@
-# pokemon-proiect
+# proiect Pokemon
